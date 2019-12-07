@@ -1,5 +1,5 @@
 //maximum number of leds you'll use (less uses less memory)
-#define LED_COUNT 300
+#define LED_COUNT 160
 
 
 //NOTE: you should define these via the platform.ini configfile if you have multiple strips, look at the examples in that platform.ini
@@ -23,5 +23,5 @@
 
 ////////////////// other stuff
 #ifndef PIN_POWER_ON
-#define PIN_POWER_ON    D0
+#define PIN_POWER_ON    5
 #endif

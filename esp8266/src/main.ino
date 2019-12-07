@@ -14,6 +14,7 @@
 
 
 #ifdef FASTLED_CONFIG
+#define FASTLED_ALLOW_INTERRUPTS 0
 #include <FastLED.h>
 #endif
 
@@ -83,7 +84,6 @@ void handle_set_commands()
             strip_anim.add_commands_activate(false);
       }
 }
-
 
 String getContentType(String filename)
 {
@@ -290,7 +290,7 @@ void setup(void){
 
     //power on/off ATX supply. when booting we always turn the ATX power on. (you can turn it off via the webgui)
     pinMode(PIN_POWER_ON, OUTPUT);
-    digitalWrite(PIN_POWER_ON, 1);
+    digitalWrite(PIN_POWER_ON, 0);
     server.on("/off", HTTP_GET, [](){
         digitalWrite(PIN_POWER_ON, 0);
         return_ok();
@@ -298,6 +298,34 @@ void setup(void){
 
     server.on("/on", HTTP_GET, [](){
         digitalWrite(PIN_POWER_ON, 1);
+        return_ok();
+    });
+
+    server.on("/white", HTTP_GET, [](){
+        strip_anim.stop();
+        strip_anim.commands.clear();
+        strip_anim.led_anim.clear(CRGB(255,255,255));
+        return_ok();
+    });
+
+    server.on("/colour", HTTP_GET, [](){
+        if (server.arg("hex")!=""){     //Parameter not found
+          String hexstring = server.arg("hex");
+          long number = (long) strtol( &hexstring[0], NULL, 16);
+          int r = number >> 16;
+          int g = number >> 8 & 0xFF;
+          int b = number & 0xFF;
+          strip_anim.stop();
+          strip_anim.commands.clear();
+          strip_anim.led_anim.clear(CRGB(r,g,b));
+        } else if ((server.arg("red")!="")&&(server.arg("green")!="")&&(server.arg("blue")!="")) {
+          strip_anim.stop();
+          strip_anim.commands.clear();
+          strip_anim.led_anim.clear(CRGB(server.arg("red").toInt(),server.arg("green").toInt(),server.arg("blue").toInt()));
+        } else {
+          return_error(F("Error setting colour."));
+        }
+        send_leds();
         return_ok();
     });
 
